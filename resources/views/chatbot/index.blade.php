@@ -10,8 +10,8 @@
     <div class="d-flex align-items-center gap-2">
       <!-- Pilihan Model -->
       <select id="model-select" class="form-select form-select-sm w-auto">
-        <option value="openrouter" >OpenRouter</option>
         <option value="gemini" selected>Gemini</option>
+        <option value="openrouter">OpenRouter</option>
       </select>
 
       <button id="new-chat" class="btn btn-outline-secondary btn-sm">
@@ -130,7 +130,7 @@
 <script>
 const chatBox = document.getElementById('chat-box');
 let conversationHistory = [];
-let selectedModel = 'openrouter'; // ✅ Default model sekarang OpenRouter
+let selectedModel = 'gemini'; // ✅ Default model sekarang OpenRouter
 
 // Menambahkan pesan ke kotak chat
 function appendMessage(sender, text) {
