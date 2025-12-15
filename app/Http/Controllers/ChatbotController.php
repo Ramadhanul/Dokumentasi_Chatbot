@@ -34,6 +34,8 @@ class ChatbotController extends Controller
         $question = trim($request->message);
         $selectedModel = $request->model ?? 'gemini'; // default Gemini
 
+        Log::info('Masuk ChatbotController@ask, user_id: ' . Auth::id() . ', message: ' . $question);
+
         // 🔹 Ambil riwayat percakapan
         $history = session('chat_history', []);
 
@@ -85,16 +87,28 @@ class ChatbotController extends Controller
                 $modelName = env('OPENROUTER_MODEL', 'meta-llama/llama-4-scout:free');
                 $endpoint = "https://openrouter.ai/api/v1/chat/completions";
 
+                Log::info("OpenRouter API Key (partial): " . substr($apiKey,0,5)."***");
+                Log::info("OpenRouter endpoint: " . $endpoint);
+                Log::info("OpenRouter payload: " . json_encode([
+                    'model' => $modelName,
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Kamu adalah asisten internal perusahaan.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ]
+                ]));
+
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
-                ])->post($endpoint, [
+                ])->timeout(60)->post($endpoint, [
                     'model' => $modelName,
                     'messages' => [
                         ['role' => 'system', 'content' => 'Kamu adalah asisten internal perusahaan.'],
                         ['role' => 'user', 'content' => $prompt],
                     ],
                 ]);
+
+                Log::info('OpenRouter response: ' . $response->body());
 
                 $json = $response->json();
                 $answer = $json['choices'][0]['message']['content'] ?? 'Maaf, saya tidak menemukan jawaban dari dokumen.';
@@ -106,19 +120,29 @@ class ChatbotController extends Controller
                 $modelName = "gemini-2.5-flash";
                 $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$modelName}:generateContent";
 
-                $response = Http::withHeaders([
+                Log::info("Gemini API Key (partial): " . substr($apiKey,0,5)."***");
+                Log::info("Gemini endpoint: " . $endpoint);
+                $payload = [
+                    "contents" => [
+                        ["parts" => [["text" => $prompt]]]
+                    ]
+                ];
+                Log::info("Gemini payload: " . json_encode($payload));
+
+                $response = Http::timeout(60)->withHeaders([
                     'Content-Type' => 'application/json',
                     'x-goog-api-key' => $apiKey,
-                ])->post($endpoint, [
-                    "contents" => [
-                        [
-                            "parts" => [["text" => $prompt]]
-                        ]
-                    ]
-                ]);
+                ])->post($endpoint, $payload);
+
+                Log::info('Gemini response: ' . $response->body());
 
                 $json = $response->json();
-                $answer = $json['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya tidak menemukan jawaban dari dokumen.';
+                if (isset($json['candidates'][0]['content']['parts'][0]['text'])) {
+                    $answer = $json['candidates'][0]['content']['parts'][0]['text'];
+                } else {
+                    Log::error('Gemini API response invalid: ' . json_encode($json));
+                    $answer = 'Maaf, tidak ada jawaban dari Gemini.';
+                }
             }
 
             // 💾 Simpan riwayat
@@ -139,5 +163,4 @@ class ChatbotController extends Controller
             'model_used' => $selectedModel
         ]);
     }
-
 }
