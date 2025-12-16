@@ -123,12 +123,7 @@ class DocumentController extends Controller
             abort(404, 'File tidak ditemukan.');
         }
 
-        $path = Storage::disk('public')->path($document->file_path);
-
-        return response()->file($path, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$document->file_original_name.'"'
-        ]);
+        return view('documents.view', compact('document'));
     }
 
     public function destroy(Document $document)
