@@ -67,12 +67,22 @@ class DocumentController extends Controller
         try {
             $file = $request->file('file');
 
-            // Simpan file ke storage/public/documents
-            $path = $file->store('documents', 'public');
+            // Ambil nama asli file
+            $originalName = $file->getClientOriginalName();
+
+            // (Opsional tapi disarankan) bersihkan nama file
+            $safeName = preg_replace('/[^a-zA-Z0-9\-_\. ]/', '', $originalName);
+
+            // Simpan dengan nama asli
+            $path = $file->storeAs(
+                'documents',
+                $safeName,
+                'public'
+            );
+
             $fullPath = Storage::disk('public')->path($path);
             Log::info("📂 File tersimpan di: " . $fullPath);
 
-            // Inisialisasi teks hasil parsing
             $text = null;
 
             try {
