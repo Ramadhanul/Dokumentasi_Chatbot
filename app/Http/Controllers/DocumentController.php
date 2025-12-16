@@ -126,6 +126,7 @@ class DocumentController extends Controller
         $path = Storage::disk('public')->path($document->file_path);
 
         return response()->file($path, [
+            'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$document->file_original_name.'"'
         ]);
     }
