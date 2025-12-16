@@ -119,13 +119,15 @@ class DocumentController extends Controller
 
     public function show(Document $document)
     {
-        // 📂 Semua user bisa mengunduh dokumen
         if (!Storage::disk('public')->exists($document->file_path)) {
             abort(404, 'File tidak ditemukan.');
         }
 
-        return Storage::disk('public')
-                      ->download($document->file_path, $document->file_original_name);
+        $path = Storage::disk('public')->path($document->file_path);
+
+        return response()->file($path, [
+            'Content-Disposition' => 'inline; filename="'.$document->file_original_name.'"'
+        ]);
     }
 
     public function destroy(Document $document)
