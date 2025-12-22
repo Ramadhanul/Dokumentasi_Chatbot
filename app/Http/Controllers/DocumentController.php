@@ -132,10 +132,7 @@ class DocumentController extends Controller
 
         $path = Storage::disk('railway')->path($document->file_path);
 
-        return response()->file($path, [
-        'Content-Disposition' =>
-            'inline; filename="' . $document->file_original_name . '"'
-    ]);
+        return response()->file($path);
     }
 
 

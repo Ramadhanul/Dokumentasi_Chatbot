@@ -16,6 +16,6 @@
     </style>
 </head>
 <body>
-    <iframe src="{{ route('documents.show', $document->id) }}"></iframe>
+    <iframe src="{{ asset('storage/'.$document->file_path) }}"></iframe>
 </body>
 </html>
