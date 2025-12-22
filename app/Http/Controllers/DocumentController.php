@@ -103,7 +103,7 @@ class DocumentController extends Controller
                 Log::warning("⚠️ PDF tidak mengandung teks: " . $file->getClientOriginalName());
             }
 
-            // Simpan ke DB
+            // Simpan ke DB ori
             $doc = Document::create([
                 'name' => $request->name,
                 'file_path' => $path,
