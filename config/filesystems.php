@@ -44,6 +44,13 @@ return [
             'throw' => false,
         ],
 
+        'railway' => [
+            'driver' => 'local',
+            'root' => '/data/uploads',
+            'url' => env('APP_URL').'/files',
+            'visibility' => 'private',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

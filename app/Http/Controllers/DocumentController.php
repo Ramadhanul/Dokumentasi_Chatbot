@@ -67,38 +67,43 @@ class DocumentController extends Controller
         try {
             $file = $request->file('file');
 
-            // Simpan file ke storage/public/documents
-            $path = $file->store('documents', 'public');
-            $fullPath = Storage::disk('public')->path($path);
-            Log::info("📂 File tersimpan di: " . $fullPath);
+            // ✅ SIMPAN KE RAILWAY VOLUME (/data/documents)
+            $path = $file->store('', 'railway');
+            $fullPath = Storage::disk('railway')->path($path);
+
+            Log::info("📂 File tersimpan di Railway Volume: " . $fullPath);
 
             // Inisialisasi teks hasil parsing
             $text = null;
 
+            // 🔹 Parsing pakai Smalot
             try {
                 $parser = new Parser();
                 $pdf = $parser->parseFile($fullPath);
                 $text = trim($pdf->getText());
-                Log::info("✅ Hasil ekstraksi awal (100 karakter pertama): " . substr($text, 0, 100));
+
+                Log::info("✅ Ekstraksi Smalot (100 char): " . substr($text, 0, 100));
             } catch (\Throwable $e) {
-                Log::error("❌ Gagal parse PDF pakai Smalot: " . $e->getMessage());
+                Log::error("❌ Smalot PDF Parser gagal: " . $e->getMessage());
             }
 
-            // Fallback ke poppler-utils (pdftotext)
+            // 🔹 Fallback ke pdftotext
             if (empty($text)) {
                 try {
-                    $text = shell_exec("pdftotext " . escapeshellarg($fullPath) . " -");
-                    Log::info("🔁 Fallback pdftotext hasil (100 karakter pertama): " . substr($text, 0, 100));
+                    $text = shell_exec(
+                        "pdftotext " . escapeshellarg($fullPath) . " -"
+                    );
+                    Log::info("🔁 Fallback pdftotext (100 char): " . substr($text, 0, 100));
                 } catch (\Throwable $e) {
-                    Log::error("❌ Fallback pdftotext gagal: " . $e->getMessage());
+                    Log::error("❌ pdftotext gagal: " . $e->getMessage());
                 }
             }
 
             if (empty($text)) {
-                Log::warning("⚠️ File PDF tidak berisi teks yang bisa diekstrak: " . $file->getClientOriginalName());
+                Log::warning("⚠️ PDF tidak mengandung teks: " . $file->getClientOriginalName());
             }
 
-            // Simpan ke database
+            // Simpan ke DB
             $doc = Document::create([
                 'name' => $request->name,
                 'file_path' => $path,
@@ -110,21 +115,26 @@ class DocumentController extends Controller
 
             $this->sendSecureTelegramNotification($doc);
 
-            return redirect()->route('documents.index')->with('success', 'Dokumen berhasil diupload.');
+            return redirect()
+                ->route('documents.index')
+                ->with('success', 'Dokumen berhasil diupload.');
         } catch (\Throwable $e) {
-            Log::error("Upload gagal: " . $e->getMessage());
-            return back()->with('error', 'Gagal upload dokumen. Coba lagi.');
+            Log::error("❌ Upload gagal: " . $e->getMessage());
+            return back()->with('error', 'Gagal upload dokumen.');
         }
     }
 
     public function show(Document $document)
     {
-        if (!Storage::disk('public')->exists($document->file_path)) {
+        if (!Storage::disk('railway')->exists($document->file_path)) {
             abort(404, 'File tidak ditemukan.');
         }
 
-        return view('documents.view', compact('document'));
+        $path = Storage::disk('railway')->path($document->file_path);
+
+        return response()->file($path);
     }
+
 
     public function destroy(Document $document)
     {
