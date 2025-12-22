@@ -82,7 +82,7 @@ class ChatbotController extends Controller
                 // 🧠 OPENROUTER
                 // ======================
                 $apiKey = env('OPENROUTER_API_KEY');
-                $modelName = env('OPENROUTER_MODEL', 'tngtech/deepseek-r1t2-chimera:free');
+                $modelName = env('OPENROUTER_MODEL', 'allenai/olmo-3.1-32b-think:free');
                 $endpoint = "https://openrouter.ai/api/v1/chat/completions";
 
                 $response = Http::withHeaders([
