@@ -287,37 +287,61 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 <script>
 /* ===========================
    🔊 TEXT TO SPEECH (BOT)
+   Google Bahasa Indonesia
 =========================== */
 
 let audioEnabled = false;
+let selectedVoice = null;
+
 const audioToggle = document.getElementById('audio-toggle');
+
+// Load voice Google Indonesia
+function loadIndonesianVoice() {
+  const voices = window.speechSynthesis.getVoices();
+
+  selectedVoice = voices.find(v =>
+    v.lang === 'id-ID' && v.name.includes('Google')
+  );
+
+  // fallback jika Google tidak ada
+  if (!selectedVoice) {
+    selectedVoice = voices.find(v => v.lang === 'id-ID');
+  }
+}
+
+// Chrome membutuhkan event ini
+window.speechSynthesis.onvoiceschanged = loadIndonesianVoice;
 
 // Toggle ON / OFF
 audioToggle.addEventListener('change', () => {
   audioEnabled = audioToggle.checked;
 
-  // Jika dimatikan → hentikan suara
   if (!audioEnabled) {
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // stop suara
   }
 });
 
 // Fungsi bicara
 function speak(text) {
   if (!audioEnabled) return;
+  if (!text) return;
 
-  // Hentikan suara sebelumnya
+  // hentikan suara sebelumnya
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = selectedVoice;
   utterance.lang = 'id-ID';
-  utterance.rate = 1;
-  utterance.pitch = 1;
-  utterance.volume = 1;
+
+  // 🎧 Setting suara natural
+  utterance.rate = 0.95;   // lebih halus
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
 
   window.speechSynthesis.speak(utterance);
 }
 </script>
+
 
 
 @endsection
