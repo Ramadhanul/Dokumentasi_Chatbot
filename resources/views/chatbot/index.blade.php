@@ -6,6 +6,12 @@
     <h4 class="text-primary m-0">
       <i class="bi bi-robot"></i> Chatbot Dokumenentasi
     </h4>
+    <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="audio-toggle">
+    <label class="form-check-label" for="audio-toggle">
+        🔊 Chatbot Audio
+    </label>
+    </div>
 
     <div class="d-flex align-items-center gap-2">
       <!-- Pilihan Model -->
@@ -208,6 +214,10 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
     document.getElementById('typing')?.remove();
     appendMessage('bot', data.answer);
     conversationHistory.push({ role: 'assistant', content: data.answer });
+
+    // 🔊 Bot bicara (jika audio aktif)
+    speak(data.answer);
+
   } catch (error) {
     document.getElementById('typing')?.remove();
     appendMessage('bot', '⚠️ Terjadi kesalahan saat memproses permintaan.');
@@ -273,5 +283,41 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   micBtn.title = "Browser tidak mendukung voice input";
 }
 </script>
+
+<script>
+/* ===========================
+   🔊 TEXT TO SPEECH (BOT)
+=========================== */
+
+let audioEnabled = false;
+const audioToggle = document.getElementById('audio-toggle');
+
+// Toggle ON / OFF
+audioToggle.addEventListener('change', () => {
+  audioEnabled = audioToggle.checked;
+
+  // Jika dimatikan → hentikan suara
+  if (!audioEnabled) {
+    window.speechSynthesis.cancel();
+  }
+});
+
+// Fungsi bicara
+function speak(text) {
+  if (!audioEnabled) return;
+
+  // Hentikan suara sebelumnya
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'id-ID';
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  window.speechSynthesis.speak(utterance);
+}
+</script>
+
 
 @endsection
