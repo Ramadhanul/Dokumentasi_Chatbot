@@ -33,13 +33,17 @@
   <form id="chat-form" class="mt-3">
     @csrf
     <div class="input-group">
-      <input type="text" id="message" class="form-control rounded-start-pill" placeholder="Ketik pertanyaan di sini..." required>
-      <button class="btn btn-primary rounded-end-pill px-4" type="submit">
+    <button type="button" id="mic-btn" class="btn btn-outline-secondary rounded-start-pill">
+        <i class="bi bi-mic"></i>
+    </button>
+
+    <input type="text" id="message" class="form-control" placeholder="Ketik atau bicara..." required>
+
+    <button class="btn btn-primary rounded-end-pill px-4" type="submit">
         <i class="bi bi-send"></i>
-      </button>
+    </button>
     </div>
-  </form>
-</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -210,4 +214,64 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
   }
 });
 </script>
+<script>
+/* ===========================
+   🎤 VOICE INPUT (STT)
+=========================== */
+
+const micBtn = document.getElementById('mic-btn');
+const messageInput = document.getElementById('message');
+
+let recognition;
+let isListening = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+
+  recognition.lang = 'id-ID'; // Bahasa Indonesia
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('btn-danger');
+    micBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove('btn-danger');
+    micBtn.innerHTML = '<i class="bi bi-mic"></i>';
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech error:', event.error);
+    recognition.stop();
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    messageInput.value = transcript;
+
+    // ⏩ AUTO KIRIM
+    document.getElementById('chat-form').dispatchEvent(
+      new Event('submit')
+    );
+  };
+
+  micBtn.addEventListener('click', () => {
+    if (!isListening) {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+  });
+
+} else {
+  micBtn.disabled = true;
+  micBtn.title = "Browser tidak mendukung voice input";
+}
+</script>
+
 @endsection
