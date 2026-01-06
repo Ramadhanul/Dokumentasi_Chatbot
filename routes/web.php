@@ -57,4 +57,6 @@ Route::post('/save-fcm-token', function (Request $request) {
     auth()->user()->update([
         'fcm_token' => $request->token
     ]);
-});
+
+    return response()->json(['success' => true]);
+})->middleware('auth');

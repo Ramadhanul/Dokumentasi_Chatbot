@@ -195,21 +195,26 @@ class DocumentController extends Controller
             Log::error('Gagal kirim notifikasi Telegram: ' . $e->getMessage());
         }
     }
-    function sendFirebaseNotification($title, $body)
+    function sendNotificationToUsers($title, $body)
     {
         $users = User::whereNotNull('fcm_token')->get();
 
         foreach ($users as $user) {
             Http::withHeaders([
-                'Authorization' => 'key=' . env('FIREBASE_SERVER_KEY'),
+                'Authorization' => 'Bearer ' . env('FIREBASE_SERVER_ACCESS_TOKEN'),
                 'Content-Type' => 'application/json',
-            ])->post('https://fcm.googleapis.com/fcm/send', [
-                'to' => $user->fcm_token,
-                'notification' => [
-                    'title' => $title,
-                    'body' => $body,
-                ],
-            ]);
+            ])->post(
+                'https://fcm.googleapis.com/v1/projects/notification-test-b142b/messages:send',
+                [
+                    "message" => [
+                        "token" => $user->fcm_token,
+                        "notification" => [
+                            "title" => $title,
+                            "body" => $body
+                        ]
+                    ]
+                ]
+            );
         }
     }
 }
