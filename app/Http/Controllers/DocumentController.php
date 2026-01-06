@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Smalot\PdfParser\Parser;
+use App\Models\User;
 
 class DocumentController extends Controller
 {
@@ -114,6 +115,10 @@ class DocumentController extends Controller
             ]);
 
             $this->sendSecureTelegramNotification($doc);
+            $this->sendFirebaseNotification(
+                '📄 Dokumen Baru',
+                'Admin menambahkan dokumen baru: ' . $doc->name
+            );
 
             return redirect()
                 ->route('documents.index')
@@ -188,6 +193,23 @@ class DocumentController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Gagal kirim notifikasi Telegram: ' . $e->getMessage());
+        }
+    }
+    function sendFirebaseNotification($title, $body)
+    {
+        $users = User::whereNotNull('fcm_token')->get();
+
+        foreach ($users as $user) {
+            Http::withHeaders([
+                'Authorization' => 'key=' . env('FIREBASE_SERVER_KEY'),
+                'Content-Type' => 'application/json',
+            ])->post('https://fcm.googleapis.com/fcm/send', [
+                'to' => $user->fcm_token,
+                'notification' => [
+                    'title' => $title,
+                    'body' => $body,
+                ],
+            ]);
         }
     }
 }

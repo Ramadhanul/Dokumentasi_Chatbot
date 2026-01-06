@@ -6,11 +6,12 @@
     <h4 class="text-primary m-0">
       <i class="bi bi-robot"></i> Chatbot Dokumenentasi
     </h4>
+
     <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" id="audio-toggle">
-    <label class="form-check-label" for="audio-toggle">
-        🔊 Chatbot Audio
-    </label>
+        <input class="form-check-input" type="checkbox" id="audio-toggle">
+        <label class="form-check-label" for="audio-toggle">
+            🔊 Chatbot Audio
+        </label>
     </div>
 
     <div class="d-flex align-items-center gap-2">

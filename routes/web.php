@@ -53,3 +53,8 @@ Route::post('/chatbot/reset', function() {
 })->middleware('auth')->name('chatbot.reset');
 
 
+Route::post('/save-fcm-token', function (Request $request) {
+    auth()->user()->update([
+        'fcm_token' => $request->token
+    ]);
+});
