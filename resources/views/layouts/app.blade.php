@@ -13,7 +13,12 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-
+    <script type="module">
+        import {
+            requestPermission
+        } from "/js/firebase.js";
+        requestPermission();
+    </script>
 <body class="bg-light">
 
     @include('layouts.navigation')
@@ -23,12 +28,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module">
-        import {
-            requestPermission
-        } from "/js/firebase.js";
-        requestPermission();
-    </script>
+
 
 </body>
 
