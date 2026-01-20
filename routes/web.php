@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\FcmController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,10 +54,6 @@ Route::post('/chatbot/reset', function() {
 })->middleware('auth')->name('chatbot.reset');
 
 
-Route::post('/save-fcm-token', function (Request $request) {
-    auth()->user()->update([
-        'fcm_token' => $request->token
-    ]);
+Route::post('/save-fcm-token', [FcmController::class, 'store'])
+    ->middleware('auth');
 
-    return response()->json(['success' => true]);
-})->middleware('auth');

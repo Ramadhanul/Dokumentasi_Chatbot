@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Smalot\PdfParser\Parser;
 use App\Models\User;
+use App\Services\FirebaseService;
 
 class DocumentController extends Controller
 {
@@ -115,9 +116,10 @@ class DocumentController extends Controller
             ]);
 
             $this->sendSecureTelegramNotification($doc);
-            $this->sendFirebaseNotification(
+            $this->sendNotificationToUsers(
                 '📄 Dokumen Baru',
-                'Admin menambahkan dokumen baru: ' . $doc->name
+                'Admin menambahkan dokumen: ' . $doc->name,
+                route('documents.show', $doc->id)
             );
 
             return redirect()
@@ -195,26 +197,24 @@ class DocumentController extends Controller
             Log::error('Gagal kirim notifikasi Telegram: ' . $e->getMessage());
         }
     }
-    function sendNotificationToUsers($title, $body)
+    private function sendNotificationToUsers($title, $body, $url)
     {
-        $users = User::whereNotNull('fcm_token')->get();
+        $firebase = new FirebaseService();
+
+        $users = User::whereNotNull('fcm_token')
+        ->where('role', 'user')   // ⬅️ FILTER HANYA USER
+        ->get();
 
         foreach ($users as $user) {
-            Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('FIREBASE_SERVER_ACCESS_TOKEN'),
-                'Content-Type' => 'application/json',
-            ])->post(
-                'https://fcm.googleapis.com/v1/projects/notification-test-b142b/messages:send',
+            $firebase->sendToToken(
+                $user->fcm_token,
+                $title,
+                $body,
                 [
-                    "message" => [
-                        "token" => $user->fcm_token,
-                        "notification" => [
-                            "title" => $title,
-                            "body" => $body
-                        ]
-                    ]
+                    'url' => $url
                 ]
             );
         }
     }
+
 }

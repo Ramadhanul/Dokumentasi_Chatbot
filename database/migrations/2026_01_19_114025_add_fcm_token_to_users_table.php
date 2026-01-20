@@ -9,20 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('fcm_token')->nullable();
+            $table->text('fcm_token')->nullable()->after('remember_token');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('fcm_token')->nullable();
+            $table->dropColumn('fcm_token');
         });
     }
+
 };
