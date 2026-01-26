@@ -36,5 +36,9 @@ return [
     'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
+    'firebase' => [
+    'credentials' => env('FIREBASE_CREDENTIALS'),
+    ],
+
 
 ];

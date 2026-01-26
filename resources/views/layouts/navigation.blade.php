@@ -23,6 +23,19 @@
                         </x-nav-link>
                     @endif
 
+                        <x-nav-link :href="route('rangkuman.index')" :active="request()->routeIs('rangkuman.*')">
+                            {{ __('Rangkuman') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('statistik.index')" :active="request()->routeIs('statistik.*')">
+                            {{ __('Statistik') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('agenda.index')" :active="request()->routeIs('agenda.*')">
+                            {{ __('Agenda') }}
+                            @if($hasTodayAgenda)
+                                <span class="badge bg-danger ms-1" title="Ada agenda hari ini!">!</span>
+                            @endif
+                        </x-nav-link>
+
                 </div>
             </div>
 
@@ -86,6 +99,16 @@
             </x-responsive-nav-link>
         </div>
         @endif
+                <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('rangkuman.index')" :active="request()->routeIs('rangkuman.*')">
+                 {{ __('Rangkuman') }}
+            </x-responsive-nav-link>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('statistik.index')" :active="request()->routeIs('statistik.*')">
+                 {{ __('Statistik') }}
+            </x-responsive-nav-link>
+        </div>
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">

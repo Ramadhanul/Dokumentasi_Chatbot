@@ -17,6 +17,8 @@ class Document extends Model
         'uploaded_at',
         'uploaded_by',
         'text',
+        'summary',
+        'summary_status',
     ];
 
     // ✅ Tambahkan ini supaya Laravel otomatis ubah ke Carbon

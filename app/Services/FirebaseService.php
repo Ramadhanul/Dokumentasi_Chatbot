@@ -10,20 +10,29 @@ class FirebaseService
 {
     protected string $projectId = 'notification-test-b142b';
 
-    private function getAccessToken(): string
-    {
-        // Ambil isi JSON langsung dari ENV
-        $serviceAccount = json_decode(base64_decode(env('FIREBASE_CREDENTIALS')), true);
+private function getAccessToken(): string
+{
+    $json = base64_decode(env('FIREBASE_CREDENTIALS'));
 
-        $credentials = new ServiceAccountCredentials(
-            'https://www.googleapis.com/auth/firebase.messaging',
-            $serviceAccount
-        );
-
-        $token = $credentials->fetchAuthToken();
-
-        return $token['access_token'];
+    if (!$json) {
+        throw new \Exception('Firebase credentials ENV kosong');
     }
+
+    $path = storage_path('app/firebase-runtime.json');
+
+    // tulis ulang ke file
+    file_put_contents($path, $json);
+
+    $credentials = new ServiceAccountCredentials(
+        'https://www.googleapis.com/auth/firebase.messaging',
+        json_decode(file_get_contents($path), true)
+    );
+
+    $token = $credentials->fetchAuthToken();
+
+    return $token['access_token'];
+}
+
 
     public function sendToToken(string $token, string $title, string $body, array $data = [])
     {

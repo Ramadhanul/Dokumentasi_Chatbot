@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Http;
 use Smalot\PdfParser\Parser;
 use App\Models\User;
 use App\Services\FirebaseService;
+use App\Jobs\GenerateDocumentSummaryJob;
+
 
 class DocumentController extends Controller
 {
@@ -115,6 +117,8 @@ class DocumentController extends Controller
                 'text' => $text,
             ]);
 
+            GenerateDocumentSummaryJob::dispatch($doc->id);
+
             $this->sendSecureTelegramNotification($doc);
             $this->sendNotificationToUsers(
                 '📄 Dokumen Baru',
@@ -129,6 +133,9 @@ class DocumentController extends Controller
             Log::error("❌ Upload gagal: " . $e->getMessage());
             return back()->with('error', 'Gagal upload dokumen.');
         }
+        Log::info("🧠 Dispatch summary job untuk document ID: " . $doc->id);
+        GenerateDocumentSummaryJob::dispatch($doc->id);
+
     }
 
     public function show(Document $document)
