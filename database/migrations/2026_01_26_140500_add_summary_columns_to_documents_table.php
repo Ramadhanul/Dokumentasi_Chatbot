@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            $table->longText('summary')->nullable()->after('content');
-            $table->string('summary_status', 20)->default('pending')->after('summary');
+            $table->longText('summary')->nullable();
+            $table->string('summary_status', 20)->default('pending');
         });
     }
 
