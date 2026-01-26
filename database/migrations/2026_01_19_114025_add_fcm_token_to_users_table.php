@@ -6,21 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('fcm_token')->nullable()->after('remember_token');
+            if (!Schema::hasColumn('users', 'fcm_token')) {
+                $table->text('fcm_token')->nullable()->after('remember_token');
+            }
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('fcm_token');
+            if (Schema::hasColumn('users', 'fcm_token')) {
+                $table->dropColumn('fcm_token');
+            }
         });
     }
-
 };
