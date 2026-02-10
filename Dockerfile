@@ -22,8 +22,11 @@ COPY . .
 
 # Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 RUN composer install --no-dev --optimize-autoloader
+
+# Build frontend (Vite)
+RUN npm install
+RUN npm run build
 
 # Permission
 RUN chown -R www-data:www-data /var/www/html \
