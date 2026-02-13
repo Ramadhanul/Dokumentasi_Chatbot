@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class RetryDatabaseConnection
@@ -15,16 +14,17 @@ class RetryDatabaseConnection
 
         while ($attempt < $maxAttempts) {
             try {
-                // paksa test koneksi dulu
                 DB::connection()->getPdo();
-                break;
+                break; // kalau berhasil langsung lanjut
             } catch (\Exception $e) {
                 $attempt++;
-                sleep(2); // tunggu 2 detik sebelum retry
 
                 if ($attempt >= $maxAttempts) {
-                    throw $e; // kalau tetap gagal, lempar error
+                    throw $e; // kalau tetap gagal setelah max retry
                 }
+
+                // 🔥 Exponential Backoff (0.5s, 1s, 1.5s, 2s, dst)
+                usleep(500000 * $attempt);
             }
         }
 
