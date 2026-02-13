@@ -83,3 +83,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/agenda/{date}', [CalendarController::class, 'show'])
         ->name('agenda.show');
 });
+
+Route::get('/health', function () {
+    try {
+        \DB::connection()->getPdo();
+        return response()->json(['status' => 'ok']);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error'], 500);
+    }
+});
