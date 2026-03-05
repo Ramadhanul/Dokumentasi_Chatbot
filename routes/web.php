@@ -12,6 +12,7 @@ use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 use Prometheus\Storage\InMemory;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -96,24 +97,11 @@ Route::get('/health', function () {
     }
 });
 
-Route::get('/metrics', function() {
-    // Setup registry
-    $registry = new CollectorRegistry(new InMemory());
-
-    // Contoh metric: hit counter untuk homepage
-    $counter = $registry->getOrRegisterCounter(
-        'app',      // namespace
-        'page_hits',// metric name
-        'Jumlah hits per page', // description
-        ['page']    // label
-    );
-
-    $counter->inc(['login']); // tambah 1 hit untuk halaman login, bisa diganti dinamis
-
-    // Render metrics
+Route::get('/metrics', function (\App\Http\Middleware\MetricsMiddleware $metrics) {
+    $registry = $metrics->getRegistry();
     $renderer = new RenderTextFormat();
-    $metrics = $renderer->render($registry->getMetricFamilySamples());
+    $metricsText = $renderer->render($registry->getMetricFamilySamples());
 
-    return response($metrics, 200)
+    return response($metricsText, 200)
         ->header('Content-Type', RenderTextFormat::MIME_TYPE);
 });
