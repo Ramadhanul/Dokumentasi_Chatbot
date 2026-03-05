@@ -8,6 +8,9 @@ use App\Http\Controllers\FcmController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\CalendarController;
+use Prometheus\CollectorRegistry;
+use Prometheus\RenderTextFormat;
+use Prometheus\Storage\InMemory;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,4 +94,26 @@ Route::get('/health', function () {
     } catch (\Exception $e) {
         return response()->json(['status' => 'error'], 500);
     }
+});
+
+Route::get('/metrics', function() {
+    // Setup registry
+    $registry = new CollectorRegistry(new InMemory());
+
+    // Contoh metric: hit counter untuk homepage
+    $counter = $registry->getOrRegisterCounter(
+        'app',      // namespace
+        'page_hits',// metric name
+        'Jumlah hits per page', // description
+        ['page']    // label
+    );
+
+    $counter->inc(['login']); // tambah 1 hit untuk halaman login, bisa diganti dinamis
+
+    // Render metrics
+    $renderer = new RenderTextFormat();
+    $metrics = $renderer->render($registry->getMetricFamilySamples());
+
+    return response($metrics, 200)
+        ->header('Content-Type', RenderTextFormat::MIME_TYPE);
 });

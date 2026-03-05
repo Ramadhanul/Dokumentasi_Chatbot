@@ -9,6 +9,7 @@
         "google/apiclient": "2.15",
         "google/auth": "^1.50",
         "guzzlehttp/guzzle": "^7.10",
+        "jimdo/prometheus_client_php": "^0.6.0",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
